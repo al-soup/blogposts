@@ -4,15 +4,33 @@ import (
 	"io/fs"
 )
 
-type Post struct {
-}
+// TODO handle only .md files
 
-func NewBlogPostFromFs(fileSystem fs.FS) []Post {
-	dir, _ := fs.ReadDir(fileSystem, ".")
-	var posts []Post
-	for range dir {
-		posts = append(posts, Post{})
+func NewBlogPostsFromFS(fileSystem fs.FS) ([]Post, error) {
+	dir, err := fs.ReadDir(fileSystem, ".")
+
+	if err != nil {
+		return nil, err
 	}
 
-	return posts
+	var posts []Post
+	for _, f := range dir {
+		post, err := getPost(fileSystem, f.Name())
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
+
+func getPost(fileSystem fs.FS, fileName string) (Post, error) {
+	postFile, err := fileSystem.Open(fileName)
+	if err != nil {
+		return Post{}, err
+	}
+	defer postFile.Close()
+
+	return newPost(postFile)
 }
