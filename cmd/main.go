@@ -4,11 +4,11 @@ import (
 	"log"
 	"os"
 
-	blogposts "github.com/al-soup/blogposts"
+	post "github.com/al-soup/blogposts/internal/blogposts"
 )
 
 func main() {
-	posts, err := blogposts.NewBlogPostsFromFS(os.DirFS("posts"))
+	posts, err := post.NewBlogPostsFromFS(os.DirFS("posts"))
 
 	if err != nil {
 		log.Fatal(err)

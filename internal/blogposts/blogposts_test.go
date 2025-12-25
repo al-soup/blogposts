@@ -7,8 +7,10 @@ import (
 	"testing"
 	"testing/fstest"
 
-	blogposts "github.com/al-soup/blogposts"
+	blogposts "github.com/al-soup/blogposts/internal/blogposts"
 )
+
+// TODO check how I can import from same dir
 
 func TestNewBlogPost(t *testing.T) {
 	const (
