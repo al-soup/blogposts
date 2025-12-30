@@ -2,11 +2,16 @@ package renderer_test
 
 import (
 	"bytes"
+	"flag"
+	"os"
 	"testing"
 
 	"github.com/al-soup/blogposts/internal/blogposts"
 	"github.com/al-soup/blogposts/internal/renderer"
 )
+
+// update test data with `go test -update`
+var update = flag.Bool("update", false, "update golden files")
 
 func TestRender(t *testing.T) {
 	post := blogposts.Post{
@@ -16,17 +21,27 @@ func TestRender(t *testing.T) {
 		Body:        "Body",
 	}
 
-	buf := bytes.Buffer{}
-	err := renderer.Render(&buf, post)
+	t.Run("converts a single post into HTML", func(t *testing.T) {
+		buf := bytes.Buffer{}
 
-	if err != nil {
-		t.Fatal(err)
-	}
+		if err := renderer.Render(&buf, post); err != nil {
+			t.Fatal(err)
+		}
 
-	got := buf.String()
-	want := "<h1>Title</h1>"
+		got := buf.String()
+		goldenFile := "testdata/post.golden"
 
-	if got != want {
-		t.Errorf("got %s, want %s", got, want)
-	}
+		if *update {
+			os.WriteFile(goldenFile, []byte(got), 0644)
+		}
+
+		want, err := os.ReadFile(goldenFile)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if got != string(want) {
+			t.Errorf("mismatch in generated template:\n%s", got)
+		}
+	})
 }
