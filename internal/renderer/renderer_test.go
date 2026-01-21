@@ -3,6 +3,7 @@ package renderer_test
 import (
 	"bytes"
 	"flag"
+	"io"
 	"os"
 	"testing"
 
@@ -23,8 +24,13 @@ func TestRender(t *testing.T) {
 
 	t.Run("converts a single post into HTML", func(t *testing.T) {
 		buf := bytes.Buffer{}
+		postRenderer, err := renderer.NewPostRenderer()
 
-		if err := renderer.Render(&buf, post); err != nil {
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if err := postRenderer.Render(&buf, post); err != nil {
 			t.Fatal(err)
 		}
 
@@ -44,4 +50,25 @@ func TestRender(t *testing.T) {
 			t.Errorf("mismatch in generated template:\n%s", got)
 		}
 	})
+}
+
+// run with `go test -bench=.`
+func BenchmarkRenderer(b *testing.B) {
+	var (
+		post = blogposts.Post{
+			Title:       "Title",
+			Description: "Description",
+			Tags:        []string{"tag1", "tag2"},
+			Body:        "Body",
+		}
+	)
+	for b.Loop() {
+		postRenderer, err := renderer.NewPostRenderer()
+
+		if err != nil {
+			b.Fatal(err)
+		}
+		postRenderer.Render(io.Discard, post)
+	}
+
 }

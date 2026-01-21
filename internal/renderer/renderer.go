@@ -8,6 +8,10 @@ import (
 	"github.com/al-soup/blogposts/internal/blogposts"
 )
 
+type PostRenderer struct {
+	templ *template.Template
+}
+
 var (
 	// Embed gives access to files embedded in the running Go program
 	// Can init vars of type string, []byte or FS
@@ -16,14 +20,19 @@ var (
 	postTemplate embed.FS
 )
 
-// Accept `io.Writer` for flexibility: write to `os.File`, `http.ResponseWriter` or anything else
-func Render(w io.Writer, p blogposts.Post) error {
+func NewPostRenderer() (*PostRenderer, error) {
 	templ, err := template.ParseFS(postTemplate, "templates/*.gohtml")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
+	return &PostRenderer{templ: templ}, nil
+}
+
+// Accept `io.Writer` for flexibility: write to `os.File`, `http.ResponseWriter` or anything else
+func (r *PostRenderer) Render(w io.Writer, p blogposts.Post) error {
+
+	if err := r.templ.ExecuteTemplate(w, "blog.gohtml", p); err != nil {
 		return err
 	}
 

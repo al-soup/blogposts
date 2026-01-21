@@ -10,6 +10,7 @@ import (
 
 // TODO check for correct formatting
 // TODO check for correct order
+// TODO render MarkDown to HTML in the body
 
 type Post struct {
 	Title       string
